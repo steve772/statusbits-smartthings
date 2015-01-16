@@ -29,7 +29,7 @@
  *  ----------------
  *
  *  2015-01-16: Version: 1.2.0
- *  Added refresh() support.
+ *  Added refresh() support by Brandon Gordon.
  *
  *  2014-08-23: Version: 1.1.0
  *  Allow 4 device groups with different polling interval. 
@@ -57,7 +57,7 @@ preferences {
 
     for (int n = 1; n <= 4; n++) {
         section("Polling Group ${n}") {
-            input "pollgroup_${n}", "capability.polling", title:"Select devices to be polled", multiple:true, required:false
+            input "group_${n}", "capability.polling", title:"Select devices to be polled", multiple:true, required:false
             input "refreshgroup_${n}", "capability.polling", title:"Select devices to be polled", multiple:true, required:false
             input "interval_${n}", "number", title:"Set polling interval (in minutes)", defaultValue:5
         }
@@ -75,25 +75,25 @@ def updated() {
 
 def pollingTask1() {
     TRACE("pollingTask1()")
-    settings.pollgroup_1*.poll()
+    settings.group_1*.poll()
     settings.refreshgroup_1*.refresh()
 }
 
 def pollingTask2() {
     TRACE("pollingTask2()")
-    settings.pollgroup_2*.poll()
+    settings.group_2*.poll()
     settings.refreshgroup_2*.refresh()
 }
 
 def pollingTask3() {
     TRACE("pollingTask3()")
-    settings.pollgroup_3*.poll()
+    settings.group_3*.poll()
     settings.refreshgroup_2*.refresh()
 }
 
 def pollingTask4() {
     TRACE("pollingTask4()")
-    settings.pollgroup_4*.poll()
+    settings.group_4*.poll()
     settings.refreshgroup_2*.refresh()
 }
 
@@ -102,9 +102,9 @@ private def initialize() {
 
     for (int n = 1; n <= 4; n++) {
         def minutes = settings."interval_${n}".toInteger()
-        def pollgroup = settings."pollgroup_${n}"
+        def group = settings."group_${n}"
         def refreshgroup = settings."refreshgroup_${n}"
-        if (minutes > 0 && (pollgroup?.size() + refreshgroup?.size())) {
+        if (minutes > 0 && (group?.size() || refreshgroup?.size())) {
             TRACE("Scheduling polling task ${n} to run every ${minutes} minutes.")
             def sched = "0 0/${minutes} * * * ?"
             switch (n) {
